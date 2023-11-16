@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@300;400&family=Zen+Kurenaido&display=swap" rel="stylesheet">
 <title>ポモドーロタイマー</title>
 <style>
   body {
@@ -15,6 +19,8 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
+    font-family: 'IBM Plex Sans JP', sans-serif;
+    font-family: 'Courier New','Zen Kurenaido', sans-serif;
   }
   .container {
     background-color: #ffffff;
@@ -26,6 +32,7 @@
     font-size: 2em;
     color: #333333;
     margin: 20px;
+    font-variant-numeric: tabular-nums;
   }
   #toggleButton {
     font-size: 1.5em;
@@ -47,45 +54,77 @@
 
 <div class="container">
   <div id="currentTime" class="timer"></div>
-  <div id="workTime" class="timer">Work: 25:00</div>
-  <div id="breakTime" class="timer">Break: 5:00</div>
+  <div id="workTime" class="timer">Work🧑‍💻: 25:00</div>
+  <div id="breakTime" class="timer">Break☕️: 5:00</div>
   <button id="toggleButton" onclick="toggleTimer()">START</button>
+  <audio id="bell" src="bell.mp3" preload="auto"></audio> 
 </div>
 
 <script>
   let workTime = 25 * 60; // 25 minutes
   let breakTime = 5 * 60; // 5 minutes
   let isRunning = false;
+  let isWorkTime = true; // 追加: 作業時間か休憩時間かを判定
   let interval;
 
   function updateCurrentTime() {
     const now = new Date();
-    document.getElementById('currentTime').textContent = 'Current Time: ' + now.toLocaleTimeString('ja-JP');
+    document.getElementById('currentTime').textContent = 'Current: ' + now.toLocaleTimeString('ja-JP');
   }
 
-  function toggleTimer() {
-    if (isRunning) {
-      clearInterval(interval);
-      document.getElementById('toggleButton').textContent = '開始';
+ function toggleTimer() {
+  if (isRunning) {
+    clearInterval(interval);
+    document.getElementById('toggleButton').textContent = 'START';
+    isRunning = false;
+  } else {
+    if (isWorkTime) {
+      startWorkTimer();
     } else {
-      interval = setInterval(() => {
-        workTime--;
-        if (workTime <= 0) {
-          clearInterval(interval);
-          alert('休憩時間です！');
-          workTime = 25 * 60; // reset work time
-        }
-        document.getElementById('workTime').textContent = 'Work Time: ' + formatTime(workTime);
-      }, 1000);
-      document.getElementById('toggleButton').textContent = 'STOP';
+      startBreakTimer(); // ここで休憩時間のタイマーを開始しています
     }
-    isRunning = !isRunning;
+    document.getElementById('toggleButton').textContent = 'STOP';
+    isRunning = true;
+  }
+}
+
+function startWorkTimer() {
+  interval = setInterval(() => {
+    workTime--;
+    document.getElementById('workTime').textContent = 'Work🧑‍💻: ' + formatTime(workTime);
+    if (workTime <= 0) {
+      clearInterval(interval);
+      playBell();
+      isWorkTime = false;
+      breakTime = 5 * 60; // ここで休憩時間をリセットしています
+      toggleTimer(); // ここで toggleTimer を呼び出すので、上で breakTime をリセットしておく必要があります
+    }
+  }, 1000);
+}
+
+function startBreakTimer() {
+  interval = setInterval(() => {
+    breakTime--;
+    document.getElementById('breakTime').textContent = 'Break☕️: ' + formatTime(breakTime);
+    if (breakTime <= 0) {
+      clearInterval(interval);
+      alert('Complete Tasks Together！');
+      isWorkTime = true;
+      workTime = 25 * 60; // ここで作業時間をリセットしています
+      toggleTimer(); // 作業時間のタイマーを再開するために toggleTimer を呼び出しています
+    }
+  }, 1000);
+}
+
+  function playBell() {
+    const bell = document.getElementById('bell');
+    bell.play();
   }
 
   function formatTime(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+  var mins = Math.floor(seconds / 60);
+  var secs = seconds % 60;
+  return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
   }
 
   // Update current time every second
