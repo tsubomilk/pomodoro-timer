@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ポモドーロタイマー</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .container {
+    background-color: #ffffff;
+    padding: 50px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .timer {
+    font-size: 2em;
+    color: #333333;
+    margin: 20px;
+  }
+  #toggleButton {
+    font-size: 1.5em;
+    padding: 10px 20px;
+    margin: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+  }
+  #toggleButton:hover {
+    background-color: #0056b3;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="currentTime" class="timer"></div>
+  <div id="workTime" class="timer">Work: 25:00</div>
+  <div id="breakTime" class="timer">Break: 5:00</div>
+  <button id="toggleButton" onclick="toggleTimer()">START</button>
+</div>
+
+<script>
+  let workTime = 25 * 60; // 25 minutes
+  let breakTime = 5 * 60; // 5 minutes
+  let isRunning = false;
+  let interval;
+
+  function updateCurrentTime() {
+    const now = new Date();
+    document.getElementById('currentTime').textContent = 'Current Time: ' + now.toLocaleTimeString('ja-JP');
+  }
+
+  function toggleTimer() {
+    if (isRunning) {
+      clearInterval(interval);
+      document.getElementById('toggleButton').textContent = '開始';
+    } else {
+      interval = setInterval(() => {
+        workTime--;
+        if (workTime <= 0) {
+          clearInterval(interval);
+          alert('休憩時間です！');
+          workTime = 25 * 60; // reset work time
+        }
+        document.getElementById('workTime').textContent = 'Work Time: ' + formatTime(workTime);
+      }, 1000);
+      document.getElementById('toggleButton').textContent = 'STOP';
+    }
+    isRunning = !isRunning;
+  }
+
+  function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+  }
+
+  // Update current time every second
+  setInterval(updateCurrentTime, 1000);
+</script>
+
+</body>
+</html>
